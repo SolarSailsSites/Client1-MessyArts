@@ -1,23 +1,28 @@
-// --- 1. INTERACTION HELPERS ---
-function copyDiscordTag(tag) {
-    const tempInput = document.createElement('input');
-    tempInput.value = tag;
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempInput);
-    showToast('Copied Discord Tag to Clipboard!');
-}
+// --- 1. TAB SWITCHING & COPYRIGHT FOOTER MANAGEMENT ---
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabPanes = document.querySelectorAll('.tab-pane');
+const cardFooter = document.getElementById('cardFooter');
 
-function showToast(msg) {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
-    toast.innerText = msg;
-    toast.classList.add('show');
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 2500);
-}
+tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabPanes.forEach(pane => pane.classList.remove('active'));
+
+        btn.classList.add('active');
+        const targetId = btn.getAttribute('data-target');
+        document.getElementById(targetId).classList.add('active');
+
+        // Hide footer on gallery and reviews tabs to protect user art/reviews
+        if (targetId === 'gallery' || targetId === 'reviews') {
+            cardFooter.style.display = 'none';
+        } else {
+            cardFooter.style.display = 'block';
+        }
+    });
+});
+
+// Automatically update copyright year
+document.getElementById('current-year').innerText = new Date().getFullYear();
 
 // --- 2. 60 FPS OPTIMIZED PROCEDURAL PIXEL ART FLOWER FIELD ENGINE ---
 const canvas = document.getElementById('flowerCanvas');
@@ -624,5 +629,23 @@ window.addEventListener('keydown', (e) => {
         toggleFocus();
     }
 });
-// Automatically update copyright year
-document.getElementById('current-year').innerText = new Date().getFullYear();
+
+// --- 4. IN-CARD GALLERY & REVIEWS LIGHTBOX VIEWER ---
+const imageModal = document.getElementById('imageModal');
+const expandedModalImg = document.getElementById('expandedModalImg');
+
+function openImageModal(imgSrc) {
+    if (!imageModal || !expandedModalImg) return;
+    expandedModalImg.src = imgSrc;
+    imageModal.classList.add('active');
+}
+
+function closeImageModal() {
+    if (!imageModal) return;
+    imageModal.classList.remove('active');
+    setTimeout(() => {
+        if (!imageModal.classList.contains('active') && expandedModalImg) {
+            expandedModalImg.src = '';
+        }
+    }, 300);
+}
